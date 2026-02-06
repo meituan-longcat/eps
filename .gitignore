@@ -1,0 +1,9 @@
+build/
+**/*.pyc
+.vscode/
+plots/
+python/**/*.so
+**/*.log
+benchmark/fast_ep/trace/
+hostfile
+python/eps.egg-info/
