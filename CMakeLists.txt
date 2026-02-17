@@ -12,9 +12,14 @@ CUDA_SELECT_NVCC_ARCH_FLAGS(NVCC_FLAGS_AUTO)
 string(REGEX MATCH "compute_([0-9]+)" _ ${NVCC_FLAGS_AUTO})
 set(COMPUTE_CAPABILITY "${CMAKE_MATCH_1}")
 
-set(SM_NUM "90a")
+set(SM_NUM "90a" CACHE STRING "Target SM architecture (e.g. 90a, 100a)")
+if(DEFINED ENV{EPS_SM_NUM} AND NOT "$ENV{EPS_SM_NUM}" STREQUAL "")
+  set(SM_NUM "$ENV{EPS_SM_NUM}" CACHE STRING "Target SM architecture (e.g. 90a, 100a)" FORCE)
+endif()
 if(SM_NUM STREQUAL "90a")
   add_definitions(-DIS_HOPPER)
+elseif(SM_NUM STREQUAL "100a")
+  add_definitions(-DIS_BLACKWELL)
 endif()
 
 option(WITH_NVSHMEM "Build with nvshmem" OFF)
@@ -54,10 +59,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(repo-mscclpp)
 set(repo-mscclpp_SOURCE_DIR ${repo-mscclpp_SOURCE_DIR} CACHE INTERNAL "")
 
-find_package(Python3 COMPONENTS Interpreter Development)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 include_directories(${Python3_INCLUDE_DIRS})
 
-execute_process(COMMAND "python3" "-c" "from __future__ import print_function; import os; import torch; print(os.path.dirname(torch.__file__),end='');"
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "from __future__ import print_function; import os; import torch; print(os.path.dirname(torch.__file__),end='');"
                 RESULT_VARIABLE _PYTHON_SUCCESS
                 OUTPUT_VARIABLE TORCH_DIR)
 if (NOT _PYTHON_SUCCESS MATCHES 0)
@@ -65,7 +70,7 @@ if (NOT _PYTHON_SUCCESS MATCHES 0)
 endif()
 list(APPEND CMAKE_PREFIX_PATH ${TORCH_DIR})
 find_package(Torch REQUIRED)
-execute_process(COMMAND "python3" "-c" "from __future__ import print_function; import torch; print(torch.__version__,end='');"
+execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "from __future__ import print_function; import torch; print(torch.__version__,end='');"
 RESULT_VARIABLE _PYTHON_SUCCESS
 OUTPUT_VARIABLE TORCH_VERSION)
 
