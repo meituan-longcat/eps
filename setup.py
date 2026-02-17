@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 from setuptools import find_packages, setup
@@ -41,15 +40,7 @@ class build_py(_build_py):
             env.setdefault("EPS_SM_NUM", "90a")
 
         subprocess.check_call(
-            [
-                "cmake",
-                "-S",
-                str(root),
-                "-B",
-                str(build_dir),
-                f"-DPython3_EXECUTABLE={sys.executable}",
-            ]
-            + cmake_args,
+            ["cmake", "-S", str(root), "-B", str(build_dir)] + cmake_args,
             env=env,
         )
         build_cmd = ["cmake", "--build", str(build_dir), "--parallel"]

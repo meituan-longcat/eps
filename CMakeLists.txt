@@ -59,10 +59,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(repo-mscclpp)
 set(repo-mscclpp_SOURCE_DIR ${repo-mscclpp_SOURCE_DIR} CACHE INTERNAL "")
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python3 COMPONENTS Interpreter Development)
 include_directories(${Python3_INCLUDE_DIRS})
 
-execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "from __future__ import print_function; import os; import torch; print(os.path.dirname(torch.__file__),end='');"
+execute_process(COMMAND "python3" "-c" "from __future__ import print_function; import os; import torch; print(os.path.dirname(torch.__file__),end='');"
                 RESULT_VARIABLE _PYTHON_SUCCESS
                 OUTPUT_VARIABLE TORCH_DIR)
 if (NOT _PYTHON_SUCCESS MATCHES 0)
@@ -70,7 +70,7 @@ if (NOT _PYTHON_SUCCESS MATCHES 0)
 endif()
 list(APPEND CMAKE_PREFIX_PATH ${TORCH_DIR})
 find_package(Torch REQUIRED)
-execute_process(COMMAND "${Python3_EXECUTABLE}" "-c" "from __future__ import print_function; import torch; print(torch.__version__,end='');"
+execute_process(COMMAND "python3" "-c" "from __future__ import print_function; import torch; print(torch.__version__,end='');"
 RESULT_VARIABLE _PYTHON_SUCCESS
 OUTPUT_VARIABLE TORCH_VERSION)
 
