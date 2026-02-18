@@ -57,6 +57,11 @@ FetchContent_Declare(
   GIT_TAG        feature/eps
 )
 FetchContent_MakeAvailable(repo-mscclpp)
+# Fix stack buffer overflow in mscclpp bootstrap: MAX_IF_NAME_SIZE (16) is too
+# small for SocketToString() output which writes a full IP<port> string.
+execute_process(COMMAND sed -i "s/MAX_IF_NAME_SIZE 16/MAX_IF_NAME_SIZE 32/g"
+    ${repo-mscclpp_SOURCE_DIR}/src/include/socket.h
+    ${repo-mscclpp_SOURCE_DIR}/src/include/endpoint.hpp)
 set(repo-mscclpp_SOURCE_DIR ${repo-mscclpp_SOURCE_DIR} CACHE INTERNAL "")
 
 find_package(Python3 COMPONENTS Interpreter Development)
