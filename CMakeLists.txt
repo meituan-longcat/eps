@@ -12,9 +12,14 @@ CUDA_SELECT_NVCC_ARCH_FLAGS(NVCC_FLAGS_AUTO)
 string(REGEX MATCH "compute_([0-9]+)" _ ${NVCC_FLAGS_AUTO})
 set(COMPUTE_CAPABILITY "${CMAKE_MATCH_1}")
 
-set(SM_NUM "90a")
+set(SM_NUM "90a" CACHE STRING "Target SM architecture (e.g. 90a, 100a)")
+if(DEFINED ENV{EPS_SM_NUM} AND NOT "$ENV{EPS_SM_NUM}" STREQUAL "")
+  set(SM_NUM "$ENV{EPS_SM_NUM}" CACHE STRING "Target SM architecture (e.g. 90a, 100a)" FORCE)
+endif()
 if(SM_NUM STREQUAL "90a")
   add_definitions(-DIS_HOPPER)
+elseif(SM_NUM STREQUAL "100a")
+  add_definitions(-DIS_BLACKWELL)
 endif()
 
 option(WITH_NVSHMEM "Build with nvshmem" OFF)
@@ -52,6 +57,11 @@ FetchContent_Declare(
   GIT_TAG        feature/eps
 )
 FetchContent_MakeAvailable(repo-mscclpp)
+# Fix stack buffer overflow in mscclpp bootstrap: MAX_IF_NAME_SIZE (16) is too
+# small for SocketToString() output which writes a full IP<port> string.
+execute_process(COMMAND sed -i "s/MAX_IF_NAME_SIZE 16/MAX_IF_NAME_SIZE 32/g"
+    ${repo-mscclpp_SOURCE_DIR}/src/include/socket.h
+    ${repo-mscclpp_SOURCE_DIR}/src/include/endpoint.hpp)
 set(repo-mscclpp_SOURCE_DIR ${repo-mscclpp_SOURCE_DIR} CACHE INTERNAL "")
 
 find_package(Python3 COMPONENTS Interpreter Development)
